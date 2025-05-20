@@ -23,4 +23,5 @@ public class User {
 
     @Column(nullable = false, name = "password")
     private String password;
+
 }
