@@ -1,0 +1,12 @@
+package org.ek.cloud_storage.repositories;
+
+import org.ek.cloud_storage.domain.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByUsername(String username);
+}
