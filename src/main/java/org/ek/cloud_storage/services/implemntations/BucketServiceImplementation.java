@@ -31,6 +31,56 @@ public class BucketServiceImplementation implements BucketService {
     private final String bucketName = "user1";
 
     @Override
+    public void renameResource(String oldName, String newName) throws IOException {
+
+        try {
+            // Create object "my-objectname" in bucket "my-bucketname" by copying from object
+            // "my-objectname" in bucket "my-source-bucketname".
+            minioClient.copyObject(
+                    CopyObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object("folder123/uploaded_to_MinIO")
+                            .source(
+                                    CopySource.builder()
+                                            .bucket(bucketName)
+                                            .object("uploaded_to_MinIO")
+                                            .build())
+                            .build());
+
+            deleteResource("uploaded_to_MinIO");
+
+        }
+        catch (ServerException | InsufficientDataException | ErrorResponseException | NoSuchAlgorithmException |
+               InvalidKeyException | InvalidResponseException | XmlParserException | InternalException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @Override
+    public void uploadResource(String path) throws IOException {
+        /*
+           object - where to upload
+           filnaem - what file to upload
+         */
+
+
+        try {
+            minioClient.uploadObject(
+                    UploadObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object("folder123/uploaded_to_MinIO")
+                            .filename("upload_Test")
+                            .build());
+
+        }
+        catch (ServerException | InsufficientDataException | ErrorResponseException | NoSuchAlgorithmException |
+               InvalidKeyException | InvalidResponseException | XmlParserException | InternalException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void downloadResource(String path) throws IOException {
 
         //Change object name and saving with the same name, now hardcoded
@@ -188,9 +238,7 @@ public class BucketServiceImplementation implements BucketService {
     public static void main(String[] args) throws IOException {
         BucketServiceImplementation bucketServiceImplementation = new BucketServiceImplementation();
 
-
-//        bucketServiceImplementation.searchResource("Test-123.txt");
-        bucketServiceImplementation.downloadResource("folder123/Test-123.txt");
+        bucketServiceImplementation.renameResource("123","123");
 
         System.exit(0);
 
