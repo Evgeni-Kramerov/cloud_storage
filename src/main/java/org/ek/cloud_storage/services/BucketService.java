@@ -5,8 +5,7 @@ import java.io.IOException;
 public interface BucketService {
 
     /*
-    ! All with resources
-    ! Update to Folders
+      ! Change all hardcoded to argumants!!
      */
 
     /*
@@ -15,8 +14,8 @@ public interface BucketService {
         *Удаление ресурса
         * Поиск
         * Скачивание ресурса
-        Переименование/перемещение ресурса
-        Аплоад
+        * Аплоад
+        * Переименование/перемещение ресурса
     * Папки
         * Создание пустой папки
         * Получение информации о содержимом папки
@@ -31,6 +30,10 @@ public interface BucketService {
     void searchResource(String name) throws IOException;
 
     void downloadResource(String path) throws IOException;
+
+    void uploadResource(String path) throws IOException;
+
+    void renameResource(String oldName, String newName) throws IOException;
 
     //**Folders
 
