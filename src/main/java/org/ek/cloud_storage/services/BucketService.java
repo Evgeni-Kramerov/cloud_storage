@@ -13,8 +13,8 @@ public interface BucketService {
     Ресурсы #
         *Получение информации о ресурсе
         *Удаление ресурса
-        Поиск
-        Скачивание ресурса
+        * Поиск
+        * Скачивание ресурса
         Переименование/перемещение ресурса
         Аплоад
     * Папки
@@ -30,6 +30,7 @@ public interface BucketService {
 
     void searchResource(String name) throws IOException;
 
+    void downloadResource(String path) throws IOException;
 
     //**Folders
 

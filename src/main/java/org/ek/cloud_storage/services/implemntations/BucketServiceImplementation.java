@@ -31,6 +31,26 @@ public class BucketServiceImplementation implements BucketService {
     private final String bucketName = "user1";
 
     @Override
+    public void downloadResource(String path) throws IOException {
+
+        //Change object name and saving with the same name, now hardcoded
+
+
+        try {
+        minioClient.downloadObject(
+                DownloadObjectArgs.builder()
+                        .bucket(bucketName)
+                        .object("folder123/Test-123.txt")
+                        .filename("my-object-file")
+                        .build());
+        }  catch (ServerException | InsufficientDataException | ErrorResponseException | NoSuchAlgorithmException |
+                  InvalidKeyException | InvalidResponseException | XmlParserException | InternalException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @Override
     public void getResourceInfo(String path) throws IOException {
 
         Path pathObj = Paths.get(path);
@@ -168,8 +188,9 @@ public class BucketServiceImplementation implements BucketService {
     public static void main(String[] args) throws IOException {
         BucketServiceImplementation bucketServiceImplementation = new BucketServiceImplementation();
 
-        bucketServiceImplementation.searchResource("Pest");
 
+//        bucketServiceImplementation.searchResource("Test-123.txt");
+        bucketServiceImplementation.downloadResource("folder123/Test-123.txt");
 
         System.exit(0);
 
