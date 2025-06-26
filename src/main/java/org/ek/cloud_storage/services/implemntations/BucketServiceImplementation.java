@@ -31,7 +31,7 @@ public class BucketServiceImplementation implements BucketService {
     private final String bucketName = "user1";
 
     @Override
-    public void renameResource(String oldName, String newName) throws IOException {
+    public void renameResource(String oldPath, String newPath) throws IOException {
 
         try {
             // Create object "my-objectname" in bucket "my-bucketname" by copying from object
@@ -39,15 +39,15 @@ public class BucketServiceImplementation implements BucketService {
             minioClient.copyObject(
                     CopyObjectArgs.builder()
                             .bucket(bucketName)
-                            .object("folder123/uploaded_to_MinIO")
+                            .object(newPath)
                             .source(
                                     CopySource.builder()
                                             .bucket(bucketName)
-                                            .object("uploaded_to_MinIO")
+                                            .object(oldPath)
                                             .build())
                             .build());
 
-            deleteResource("uploaded_to_MinIO");
+            deleteResource(oldPath);
 
         }
         catch (ServerException | InsufficientDataException | ErrorResponseException | NoSuchAlgorithmException |
@@ -58,19 +58,15 @@ public class BucketServiceImplementation implements BucketService {
     }
 
     @Override
-    public void uploadResource(String path) throws IOException {
-        /*
-           object - where to upload
-           filnaem - what file to upload
-         */
+    public void uploadResource(String pathWhereToUpload, String pathToLocalObject) throws IOException {
 
 
         try {
             minioClient.uploadObject(
                     UploadObjectArgs.builder()
                             .bucket(bucketName)
-                            .object("folder123/uploaded_to_MinIO")
-                            .filename("upload_Test")
+                            .object(pathWhereToUpload)
+                            .filename(pathToLocalObject)
                             .build());
 
         }
@@ -81,7 +77,7 @@ public class BucketServiceImplementation implements BucketService {
     }
 
     @Override
-    public void downloadResource(String path) throws IOException {
+    public void downloadResource(String pathCloudObject, String pathLocalObject) throws IOException {
 
         //Change object name and saving with the same name, now hardcoded
 
@@ -90,8 +86,8 @@ public class BucketServiceImplementation implements BucketService {
         minioClient.downloadObject(
                 DownloadObjectArgs.builder()
                         .bucket(bucketName)
-                        .object("folder123/Test-123.txt")
-                        .filename("my-object-file")
+                        .object(pathCloudObject)
+                        .filename(pathLocalObject)
                         .build());
         }  catch (ServerException | InsufficientDataException | ErrorResponseException | NoSuchAlgorithmException |
                   InvalidKeyException | InvalidResponseException | XmlParserException | InternalException e) {
@@ -105,8 +101,6 @@ public class BucketServiceImplementation implements BucketService {
 
         Path pathObj = Paths.get(path);
 
-//        listObjects(ListObjectsArgs args)
-//        statObject(StatObjectArgs args)
         try {
 
         StatObjectResponse objectStat =
@@ -116,6 +110,7 @@ public class BucketServiceImplementation implements BucketService {
                         .build());
 
         ResourceInfoResponseDTO resourceInfoResponseDTO = new ResourceInfoResponseDTO();
+
         resourceInfoResponseDTO.setName(pathObj.getFileName().toString());
         resourceInfoResponseDTO.setPath(pathObj.getParent().toString().replace("^/", "") +"/");
         resourceInfoResponseDTO.setSize(objectStat.size());
@@ -131,13 +126,14 @@ public class BucketServiceImplementation implements BucketService {
 
     @Override
     public void deleteResource(String path) throws IOException {
-        Path pathObj = Paths.get(path);
-        try{
+
+        try {
 
         minioClient.removeObject(RemoveObjectArgs.builder()
                 .bucket(bucketName)
                 .object(path)
                 .build());
+
         } catch (ServerException | InsufficientDataException | ErrorResponseException | NoSuchAlgorithmException |
                  InvalidKeyException | InvalidResponseException | XmlParserException | InternalException e) {
             throw new RuntimeException(e);
@@ -235,12 +231,4 @@ public class BucketServiceImplementation implements BucketService {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        BucketServiceImplementation bucketServiceImplementation = new BucketServiceImplementation();
-
-        bucketServiceImplementation.renameResource("123","123");
-
-        System.exit(0);
-
-    }
 }

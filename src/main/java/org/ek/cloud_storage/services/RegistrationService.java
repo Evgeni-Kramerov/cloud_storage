@@ -1,14 +1,13 @@
 package org.ek.cloud_storage.services;
 
 import lombok.RequiredArgsConstructor;
-import org.ek.cloud_storage.domain.dto.RegistrationRequestDTO;
+import org.ek.cloud_storage.domain.dto.UserDetailsRequestDTO;
 import org.ek.cloud_storage.domain.model.User;
 import org.ek.cloud_storage.mappers.UserMapper;
 import org.ek.cloud_storage.repositories.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
 import java.util.Optional;
 
 @Service
@@ -19,9 +18,9 @@ public class RegistrationService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-    public Optional<User> registerNewUser(RegistrationRequestDTO registrationRequestDTO) {
+    public Optional<User> registerNewUser(UserDetailsRequestDTO userDetailsRequestDTO) {
 
-        User user = userMapper.registrationRequesttoUser(registrationRequestDTO);
+        User user = userMapper.registrationRequesttoUser(userDetailsRequestDTO);
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 

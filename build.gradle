@@ -42,6 +42,10 @@ dependencies {
     implementation("io.minio:minio:8.5.17")
 
 
+    implementation 'org.springframework.session:spring-session-core:3.5.1'
+
+
+
     runtimeOnly 'org.postgresql:postgresql'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
