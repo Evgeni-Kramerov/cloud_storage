@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegistrationRequestDTO {
+public class UserDetailsRequestDTO {
     @Size(min = 4, max = 40, message = "Username must be from 4 to 40 characters long")
     private String username;
 
