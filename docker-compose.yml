@@ -1,4 +1,10 @@
 services:
+
+  frontend:
+    image: cloud_storage_frontend
+    ports:
+      - "8090:80"
+
   postgres:
     image: postgres
     container_name: postgres_db
