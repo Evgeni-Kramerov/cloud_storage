@@ -2,7 +2,6 @@ package org.ek.cloud_storage;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
-import org.ek.cloud_storage.minio.domain.dto.ErrorResponseDTO;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.dao.DataIntegrityViolationException;

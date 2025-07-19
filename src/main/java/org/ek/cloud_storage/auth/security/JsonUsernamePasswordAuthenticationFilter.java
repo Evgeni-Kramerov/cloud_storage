@@ -6,7 +6,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.ek.cloud_storage.minio.domain.dto.ErrorResponseDTO;
+import org.ek.cloud_storage.auth.domain.UserResponseDTO;
+import org.ek.cloud_storage.ErrorResponseDTO;
 import org.ek.cloud_storage.auth.domain.UserDetailsRequestDTO;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -52,16 +53,60 @@ public class JsonUsernamePasswordAuthenticationFilter extends AbstractAuthentica
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        // Set the authentication in the context
-        SecurityContextHolder.getContext().setAuthentication(authResult);
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain chain,
+                                            Authentication authResult) throws IOException, ServletException {
+        Object principal = authResult.getPrincipal();
 
-        // Create a new session and bind it with the authentication
-        HttpSession session = request.getSession(true);
-        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                SecurityContextHolder.getContext());
+        if (principal instanceof CloudUserDetails details) {
+            CloudUserSession sessionPrincipal = new CloudUserSession(
+                    details.getUser().getId(),
+                    details.getUsername()
+            );
 
+            Authentication sessionAuth = new UsernamePasswordAuthenticationToken(
+                    sessionPrincipal,
+                    null,
+                    sessionPrincipal.getAuthorities()
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(sessionAuth);
+        }
+        else {
+            SecurityContextHolder.getContext().setAuthentication(authResult);
+        }
+
+        UserResponseDTO user = new UserResponseDTO(authResult.getName());
+//
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        objectMapper.writeValue(response.getOutputStream(), user);
+
+//        chain.doFilter(request, response);
     }
+
+    //    @Override
+//    protected void successfulAuthentication(HttpServletRequest request,
+//                                            HttpServletResponse response, FilterChain chain,
+//                                            Authentication authResult) throws IOException, ServletException {
+//        // Set the authentication in the context
+//        SecurityContextHolder.getContext().setAuthentication(authResult);
+//
+//        // Create a new session and bind it with the authentication
+//        HttpSession session = request.getSession(true);
+//        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+//                SecurityContextHolder.getContext());
+//
+//        UserResponseDTO user = new UserResponseDTO(authResult.getName());
+//
+//        response.setContentType("application/json");
+//        response.setStatus(HttpServletResponse.SC_OK);
+//
+//        objectMapper.writeValue(response.getOutputStream(), user);
+//
+//    }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,

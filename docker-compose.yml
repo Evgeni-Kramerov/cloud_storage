@@ -31,8 +31,31 @@ services:
     volumes:
       - minio_data:/data
 
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redisinsight
+    ports:
+      - "5540:5540"
+    restart: always
+    volumes:
+      - redis_insight:/data
+
+
 volumes:
   postgres_data:
     name: postgres_data
   minio_data:
     name: minio_data
+  redis_data:
+    name: redis_data
+  redis_insight:
+    name: redis_insight

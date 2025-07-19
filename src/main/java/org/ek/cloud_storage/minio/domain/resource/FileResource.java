@@ -1,8 +1,11 @@
-package org.ek.cloud_storage.minio.domain.model.resource.file;
+package org.ek.cloud_storage.minio.domain.resource;
 
-import org.ek.cloud_storage.minio.domain.model.resource.Resource;
-import org.ek.cloud_storage.minio.domain.model.resource.ResourceTypeENUM;
+import lombok.Getter;
+import lombok.Setter;
+import org.ek.cloud_storage.minio.domain.ResourceTypeENUM;
 
+@Getter
+@Setter
 public class FileResource extends Resource {
     private long size;
 

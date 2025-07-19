@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.ek.cloud_storage.minio.domain.dto.ErrorResponseDTO;
+import org.ek.cloud_storage.ErrorResponseDTO;
 import org.ek.cloud_storage.auth.domain.UserDetailsRequestDTO;
 import org.ek.cloud_storage.auth.domain.UserResponseDTO;
 import org.ek.cloud_storage.auth.domain.User;
