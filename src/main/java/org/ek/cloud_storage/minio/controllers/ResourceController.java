@@ -1,10 +1,13 @@
 package org.ek.cloud_storage.minio.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
-import org.ek.cloud_storage.minio.domain.dto.ResourceInfoResponseDTO;
+import org.ek.cloud_storage.minio.domain.dto.ResourceResponseDTO;
+import org.ek.cloud_storage.minio.domain.resource.DownloadResource;
+import org.ek.cloud_storage.minio.domain.resource.Resource;
+import org.ek.cloud_storage.minio.mappers.ResourceMapper;
 import org.ek.cloud_storage.minio.services.BucketService;
 import org.ek.cloud_storage.minio.services.PathService;
+import org.simpleframework.xml.Path;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,40 +29,25 @@ public class ResourceController {
 
     private final BucketService bucketService;
 
+    private final ResourceMapper resourceMapper;
+
    @GetMapping
-    public ResponseEntity<ResourceInfoResponseDTO> getResources(Principal principal, String path) throws IOException {
-
-       /*
-        1) Getting request
-        2) Check path is valid
-        3) Identify request for file or folder - in service layer
-        4) Method for file or method for folder
-        */
-
-
-
-       pathService.validatePath(path);
-       String fullPath = pathService.fullPathForUser(principal, path);
-       return ResponseEntity.ok(bucketService.getResourceInfo(fullPath));
-
-
-   }
-
-    @PostMapping
-    public ResponseEntity<ResourceInfoResponseDTO> uploadResources(Principal principal,
-                                                                   @RequestPart String path,
-                                                                   @RequestPart("file") MultipartFile file) throws IOException {
+    public ResponseEntity<ResourceResponseDTO> getResources(Principal principal,
+                                                           @RequestParam String path) throws IOException {
 
        String fullPath = pathService.fullPathForUser(principal, path);
 
-       bucketService.uploadResource(fullPath, file);
+       Resource resource = bucketService.getResourceInfo(fullPath);
 
-       return ResponseEntity.ok(bucketService.getResourceInfo(fullPath));
+       ResourceResponseDTO resourceResponseDTO = resourceMapper.resourceToResourceResponseDTO(resource);
+
+       return ResponseEntity.ok(resourceResponseDTO);
 
    }
 
-   @DeleteMapping
-    public ResponseEntity<Void> deleteResources(Principal principal, String path) throws IOException {
+       @DeleteMapping
+    public ResponseEntity<Void> deleteResources(Principal principal,
+                                                @RequestParam String path) throws IOException {
 
        String fullPath = pathService.fullPathForUser(principal, path);
 
@@ -69,43 +57,76 @@ public class ResourceController {
    }
 
    @GetMapping("/download")
-    public ResponseEntity<StreamingResponseBody> downloadResources(Principal principal, String path) throws IOException {
+    public ResponseEntity<StreamingResponseBody> downloadResources(
+            Principal principal,
+            @RequestParam String path) throws IOException {
 
        String fullPath = pathService.fullPathForUser(principal, path);
 
-       StreamingResponseBody responseBody = outputStream -> {
-           try(InputStream inputStream = bucketService.downloadObject(fullPath)) {
-               inputStream.transferTo(outputStream);
-           }
-       };
+       DownloadResource downloadResource = bucketService.downloadResource(fullPath);
 
        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + path)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + downloadResource.getFileName())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(responseBody);
+                .body(downloadResource.getBody());
 
    }
 
-   @GetMapping("/move")
-    public ResponseEntity<ResourceInfoResponseDTO> moveResources(Principal principal, String from, String to) throws IOException {
+       @GetMapping("/move")
+    public ResponseEntity<ResourceResponseDTO> moveResources(Principal principal,
+                                                             @RequestParam String from,
+                                                             @RequestParam String to) throws IOException {
 
        String fullPathFrom = pathService.fullPathForUser(principal, from);
        String fullPathTo = pathService.fullPathForUser(principal, to);
 
        bucketService.moveResource(fullPathFrom, fullPathTo);
 
-       return ResponseEntity.ok(bucketService.getResourceInfo(fullPathTo));
+       Resource resource = bucketService.getResourceInfo(fullPathTo);
+
+       ResourceResponseDTO resourceResponseDTO = resourceMapper.resourceToResourceResponseDTO(resource);
+
+       return ResponseEntity.ok(resourceResponseDTO);
 
    }
 
-   @GetMapping("/search")
-    public ResponseEntity<List<ResourceInfoResponseDTO>> searchResources(Principal principal,
-                                                                         String query) throws IOException {
+      @GetMapping("/search")
+    public ResponseEntity<List<ResourceResponseDTO>> searchResources(Principal principal,
+                                                                     String query) throws IOException {
 
-        //TODO: Add only correct user handling
+       String userFolder = pathService.getUserPrefix(principal);
 
-       return ResponseEntity.ok(bucketService.searchResource(query));
+       //check what wrong with frontend
+
+       List<Resource> results = bucketService.searchResource(userFolder, query);
+
+       List<ResourceResponseDTO> response = resourceMapper.resourceListToDtoList(results);
+
+       return ResponseEntity.ok(response);
    }
+
+
+    @PostMapping
+    public ResponseEntity<ResourceResponseDTO> uploadResources(Principal principal,
+                                                               @RequestParam("path") String path,
+                                                               @RequestPart("object") MultipartFile file) throws IOException {
+
+        System.out.println("upload resources controller");
+
+        System.out.println("Path: " + path);
+
+       String fullPath =  pathService.fullPathForUser(principal, path);
+
+       bucketService.uploadResource(fullPath, file);
+
+       Resource resource = bucketService.getResourceInfo(fullPath);
+
+       ResourceResponseDTO resourceResponseDTO = resourceMapper.resourceToResourceResponseDTO(resource);
+
+       return ResponseEntity.ok(resourceResponseDTO);
+
+   }
+
 
 
 

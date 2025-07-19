@@ -1,4 +1,4 @@
-package org.ek.cloud_storage.minio.domain.dto;
+package org.ek.cloud_storage;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

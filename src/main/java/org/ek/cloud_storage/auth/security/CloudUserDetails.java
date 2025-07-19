@@ -1,5 +1,6 @@
 package org.ek.cloud_storage.auth.security;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.ek.cloud_storage.auth.domain.User;
 import org.springframework.security.core.GrantedAuthority;
@@ -8,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+@Getter
 @RequiredArgsConstructor
 public class CloudUserDetails implements UserDetails {
 

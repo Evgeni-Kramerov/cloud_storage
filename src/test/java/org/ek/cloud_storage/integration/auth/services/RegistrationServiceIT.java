@@ -1,4 +1,4 @@
-package org.ek.cloud_storage.integration.services;
+package org.ek.cloud_storage.integration.auth.services;
 
 import org.ek.cloud_storage.auth.domain.UserDetailsRequestDTO;
 import org.ek.cloud_storage.auth.domain.User;

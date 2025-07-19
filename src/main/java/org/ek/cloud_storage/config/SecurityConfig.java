@@ -3,7 +3,9 @@ package org.ek.cloud_storage.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.ek.cloud_storage.ErrorResponseDTO;
 import org.ek.cloud_storage.auth.security.CloudUserDetailsService;
+import org.ek.cloud_storage.auth.security.CustomAuthEntryPoint;
 import org.ek.cloud_storage.auth.security.JsonUsernamePasswordAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +33,8 @@ public class SecurityConfig {
 
     private final CloudUserDetailsService userDetailsService;
 
+    private final CustomAuthEntryPoint customAuthEntryPoint;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    AuthenticationManager authenticationManager) throws Exception {
@@ -57,7 +61,8 @@ public class SecurityConfig {
                             if (authentication ==  null || !authentication.isAuthenticated() ) {
                                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                                 response.setContentType("application/json");
-                                response.getWriter().write(new ObjectMapper().writeValueAsString("Unauthorized"));
+                                ErrorResponseDTO error = new ErrorResponseDTO("Unauthorized");
+                                response.getWriter().write(new ObjectMapper().writeValueAsString(error));
                             }
                             else {
                                 response.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -68,8 +73,9 @@ public class SecurityConfig {
 
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                .authenticationProvider(daoAuthenticationProvider()) // This is important
+                .authenticationProvider(daoAuthenticationProvider())
                 .addFilterAt(jsonAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthEntryPoint))
                 .build();
     }
 

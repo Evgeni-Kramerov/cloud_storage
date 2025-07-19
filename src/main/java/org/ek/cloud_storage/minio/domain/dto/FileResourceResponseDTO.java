@@ -1,9 +1,12 @@
-package org.ek.cloud_storage.minio.domain.model.resource.file;
+package org.ek.cloud_storage.minio.domain.dto;
 
 
-import org.ek.cloud_storage.minio.domain.model.resource.ResourceResponseDTO;
-import org.ek.cloud_storage.minio.domain.model.resource.ResourceTypeENUM;
+import lombok.Getter;
+import lombok.Setter;
+import org.ek.cloud_storage.minio.domain.ResourceTypeENUM;
 
+@Getter
+@Setter
 public class FileResourceResponseDTO extends ResourceResponseDTO {
     private long size;
 
