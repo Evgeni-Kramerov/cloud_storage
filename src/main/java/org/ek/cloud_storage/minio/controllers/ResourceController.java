@@ -9,6 +9,7 @@ import org.ek.cloud_storage.minio.services.BucketService;
 import org.ek.cloud_storage.minio.services.PathService;
 import org.simpleframework.xml.Path;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,8 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -107,27 +110,23 @@ public class ResourceController {
 
 
     @PostMapping
-    public ResponseEntity<ResourceResponseDTO> uploadResources(Principal principal,
+    public ResponseEntity<List<ResourceResponseDTO>> uploadResources(Principal principal,
                                                                @RequestParam("path") String path,
-                                                               @RequestPart("object") MultipartFile file) throws IOException {
+                                                               @RequestParam("object") MultipartFile[] files) throws IOException {
 
-        System.out.println("upload resources controller");
+       System.out.println("In upload Resource controller");
 
-        System.out.println("Path: " + path);
+       List<MultipartFile> multipartFiles = Arrays.asList(files);
 
        String fullPath =  pathService.fullPathForUser(principal, path);
 
-       bucketService.uploadResource(fullPath, file);
+       List<Resource> uploadedResources =  bucketService.uploadResource(fullPath, multipartFiles);
 
-       Resource resource = bucketService.getResourceInfo(fullPath);
+       List<ResourceResponseDTO> resourceResponseDTOList = resourceMapper.resourceListToDtoList(uploadedResources);
 
-       ResourceResponseDTO resourceResponseDTO = resourceMapper.resourceToResourceResponseDTO(resource);
-
-       return ResponseEntity.ok(resourceResponseDTO);
+       return new ResponseEntity<>(resourceResponseDTOList, HttpStatus.CREATED);
 
    }
-
-
 
 
 }
