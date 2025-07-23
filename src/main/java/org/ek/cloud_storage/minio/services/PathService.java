@@ -114,6 +114,9 @@ public class PathService {
     }
 
     public String getParentFolderPath(String path) {
+        if (!path.contains("/") || path.indexOf("/") == path.lastIndexOf("/")) {
+            return "/";
+        }
         return path.substring(0, path.substring(0,path.length()-1).lastIndexOf("/"));
 
     }

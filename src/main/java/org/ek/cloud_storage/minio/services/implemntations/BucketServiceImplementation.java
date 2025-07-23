@@ -28,10 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.StreamSupport;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -97,6 +94,9 @@ public class BucketServiceImplementation implements BucketService {
 
     @Override
     public boolean folderExists(String path) throws IOException {
+
+        if (path.equals("/"))
+            return true;
 
         Iterable<Result<Item>> results = minioClient.listObjects(
                 ListObjectsArgs.builder()
@@ -628,10 +628,15 @@ public class BucketServiceImplementation implements BucketService {
     public void createEmptyFolder(String path) throws IOException {
 
         if (folderExists(path)) {
+            System.out.println("Falder already exists: " + path);
             throw new MinIoResourceErrorException("Folder already exists");
         }
 
+        System.out.println("Creating new folder: " + path);
+
         if (!folderExists(pathService.getParentFolderPath(path))) {
+
+            System.out.println("Parent folder does not exist: " + pathService.getParentFolderPath(path));
             throw new MinIoResourceErrorException("Parent folder doesnt exists");
         }
 
