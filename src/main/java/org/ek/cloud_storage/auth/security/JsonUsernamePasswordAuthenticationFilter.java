@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -59,32 +60,37 @@ public class JsonUsernamePasswordAuthenticationFilter extends AbstractAuthentica
                                             Authentication authResult) throws IOException, ServletException {
         Object principal = authResult.getPrincipal();
 
+        Authentication sessionAuth;
+
         if (principal instanceof CloudUserDetails details) {
             CloudUserSession sessionPrincipal = new CloudUserSession(
                     details.getUser().getId(),
                     details.getUsername()
             );
 
-            Authentication sessionAuth = new UsernamePasswordAuthenticationToken(
+            sessionAuth = new UsernamePasswordAuthenticationToken(
                     sessionPrincipal,
                     null,
                     sessionPrincipal.getAuthorities()
             );
-
-            SecurityContextHolder.getContext().setAuthentication(sessionAuth);
-        }
-        else {
-            SecurityContextHolder.getContext().setAuthentication(authResult);
+        } else {
+            sessionAuth = authResult;
         }
 
-        UserResponseDTO user = new UserResponseDTO(authResult.getName());
-//
+        // Set security context
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(sessionAuth);
+        SecurityContextHolder.setContext(context);
+
+        // ✅ Save context to session
+        HttpSessionSecurityContextRepository repo = new HttpSessionSecurityContextRepository();
+        repo.saveContext(context, request, response);
+
+        // Send user response
+        UserResponseDTO user = new UserResponseDTO(sessionAuth.getName());
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
-
         objectMapper.writeValue(response.getOutputStream(), user);
-
-//        chain.doFilter(request, response);
     }
 
     //    @Override
