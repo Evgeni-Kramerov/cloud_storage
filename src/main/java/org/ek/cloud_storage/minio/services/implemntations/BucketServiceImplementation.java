@@ -98,8 +98,6 @@ public class BucketServiceImplementation implements BucketService {
     @Override
     public boolean folderExists(String path) throws IOException {
 
-        System.out.println("folderExists");
-
         Iterable<Result<Item>> results = minioClient.listObjects(
                 ListObjectsArgs.builder()
                         .bucket(bucketName)
@@ -252,24 +250,62 @@ public class BucketServiceImplementation implements BucketService {
     }
 
     @Override
-    public void uploadResource(String path, MultipartFile file) throws IOException {
+    public List<Resource> uploadResource(String path, List<MultipartFile> files) throws IOException {
 
-        System.out.println("Path from service " + path);
+        System.out.println("In upload Resource function");
 
-        try {
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(path)
-                            .stream(file.getInputStream(), file.getSize(), -1)
-                            .contentType(file.getContentType())
-                            .build());
+        Set<String> folders = new HashSet<>();
+        List<Resource> uploaded = new ArrayList<>();
 
+        for (MultipartFile file : files) {
+            String originalPath = file.getOriginalFilename();
+            if (originalPath == null || file.isEmpty()) continue;
+
+            String objectName = path + "/" + originalPath.replace("\\", "/");
+
+            // Track all folder parts
+            String[] parts = originalPath.split("[/\\\\]");
+            StringBuilder folderPath = new StringBuilder(path);
+            for (int i = 0; i < parts.length - 1; i++) {
+                folderPath.append("/").append(parts[i]);
+                folders.add(folderPath.toString());
+            }
+
+            // Upload the file
+            try (InputStream is = file.getInputStream()) {
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(bucketName)
+                                .object(objectName)
+                                .stream(is, file.getSize(), -1)
+                                .contentType(file.getContentType())
+                                .build()
+                );
+
+                uploaded.add(new FileResource(objectName, file.getOriginalFilename(), file.getSize()));
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to upload " + originalPath, e);
+            }
         }
-        catch (ServerException | InsufficientDataException | ErrorResponseException | NoSuchAlgorithmException |
-               InvalidKeyException | InvalidResponseException | XmlParserException | InternalException e) {
-            throw new RuntimeException(e);
+
+        // Optionally create folder placeholders
+        for (String folder : folders) {
+            try {
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(bucketName)
+                                .object(folder + "/")
+                                .stream(new ByteArrayInputStream(new byte[0]), 0, -1)
+                                .contentType("application/x-directory")
+                                .build()
+                );
+            } catch (Exception e) {
+                // ignore or log
+            }
+            uploaded.add(new FolderResource(folder + "/", folder));
         }
+
+        return uploaded;
     }
 
     @Override
@@ -595,7 +631,7 @@ public class BucketServiceImplementation implements BucketService {
             throw new MinIoResourceErrorException("Folder already exists");
         }
 
-        if (folderExists(pathService.getParentFolderPath(path))) {
+        if (!folderExists(pathService.getParentFolderPath(path))) {
             throw new MinIoResourceErrorException("Parent folder doesnt exists");
         }
 

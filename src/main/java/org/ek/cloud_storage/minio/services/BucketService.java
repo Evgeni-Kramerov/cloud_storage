@@ -33,7 +33,7 @@ public interface BucketService {
 
     DownloadResource downloadFile(String path);
 
-    void uploadResource(String path, MultipartFile file) throws IOException;
+    List<Resource> uploadResource(String path, List<MultipartFile> files) throws IOException;
 
     void moveResource(String oldPath, String newPath) throws IOException;
 

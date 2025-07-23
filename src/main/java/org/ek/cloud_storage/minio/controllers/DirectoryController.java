@@ -52,6 +52,10 @@ public class DirectoryController {
 
         String fullPath = pathService.fullPathForUser(principal,path);
 
+        System.out.println("In create empty folder controller");
+
+        System.out.println(path);
+
         //TODO Return Whats needed for each method
 
         bucketService.createEmptyFolder(fullPath);
@@ -61,7 +65,7 @@ public class DirectoryController {
 
         ResourceResponseDTO response = resourceMapper.resourceToResourceResponseDTO(createdFolder);
 
-        return  new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
 }
