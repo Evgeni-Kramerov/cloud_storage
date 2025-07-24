@@ -558,17 +558,42 @@ public class BucketServiceImplementation implements BucketService {
                         .prefix(userFolder)
                         .recursive(true)
                         .build());
+
         try {
             for (Result<Item> result : allFiles) {
                 Item item = result.get();
                 String objectName = item.objectName();
 
-                String name = objectName.substring(objectName.lastIndexOf("/"));
-                System.out.println("-------------New Object");
-                System.out.println("Name " + name);
+                System.out.println("Object name - "  + objectName);
 
+                String name;
 
-                if (name.toLowerCase().contains(query.toLowerCase())) {
+                if (objectName.endsWith("/")) {
+                    String substring  = objectName.substring(0, objectName.length() - 1);
+                    System.out.println("Substring - " + substring);
+                    name = substring.substring(substring.lastIndexOf("/")+1);
+
+                    if (name.toLowerCase().contains(query.toLowerCase())) {
+
+                        System.out.println("Matched object folder - " + objectName);
+
+                        FolderResource folderResource = new FolderResource(
+                                pathService.removeUserFolderFromPath(objectName),
+                                name + "/"
+                        );
+                        results.add(folderResource);
+
+                    }
+
+                    //**Add folder
+                }
+                else{
+                    name = objectName.substring(objectName.lastIndexOf("/")+1);
+
+                    if (name.toLowerCase().contains(query.toLowerCase())) {
+
+                        System.out.println("Matched object file - " + objectName);
+
                         FileResource fileResource = new FileResource(
                                 pathService.removeUserFolderFromPath(objectName),
                                 name,
@@ -576,43 +601,12 @@ public class BucketServiceImplementation implements BucketService {
                         );
                         results.add(fileResource);
 
-
                     }
 
-                Path parentPath = Paths.get(objectName).getParent();
-
-                while (parentPath != null) {
-                    matchedFolders.add(parentPath.toString().replace("\\", "/") + "/");
-                    parentPath = parentPath.getParent();
-                    }
-                }
-
-            for (String folderPath : matchedFolders) {
-
-                String folderName = pathService.getResourceName(folderPath);
-
-                //TODO Parent folder Path correct
-
-                Path folderPathCorrect = Paths.get(pathService.removeUserFolderFromPath(folderPath))
-                        .normalize();
-                Path parentPath = folderPathCorrect.getParent();
-
-                if (parentPath == null) {
-                    parentPath = Path.of("/");
-                }
-
-                System.out.println("Folder full path " + folderPathCorrect);
-                System.out.println("Folder parent Path" + parentPath);
-
-
-                if (folderName.toLowerCase().contains(query.toLowerCase())) {
-                    FolderResource folder = new FolderResource(
-                            parentPath.toString(),
-                            folderName
-                    );
-                    results.add(folder);
+                    //**Add file
                 }
             }
+
         }
         catch (ServerException | InsufficientDataException | ErrorResponseException | NoSuchAlgorithmException |
                InvalidKeyException | InvalidResponseException | XmlParserException | InternalException e) {
