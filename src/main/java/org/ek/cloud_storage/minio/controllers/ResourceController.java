@@ -99,7 +99,7 @@ public class ResourceController {
 
        String userFolder = pathService.getUserPrefix(principal);
 
-       //check what wrong with frontend
+       //Problem - return only folders
 
        List<Resource> results = bucketService.searchResource(userFolder, query);
 
