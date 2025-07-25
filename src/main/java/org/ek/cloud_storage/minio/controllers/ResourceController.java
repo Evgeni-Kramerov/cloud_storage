@@ -97,6 +97,10 @@ public class ResourceController {
     public ResponseEntity<List<ResourceResponseDTO>> searchResources(Principal principal,
                                                                      String query) throws IOException {
 
+       if (query == null || query.isEmpty()) {
+           throw new IllegalArgumentException("query is null or empty");
+       }
+
        String userFolder = pathService.getUserPrefix(principal);
 
        //Problem - return only folders
