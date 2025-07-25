@@ -5,9 +5,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.ek.cloud_storage.ErrorResponseDTO;
+import org.ek.cloud_storage.api.docs.annotations.SignUpApiDocs;
 import org.ek.cloud_storage.auth.domain.UserDetailsRequestDTO;
 import org.ek.cloud_storage.auth.domain.UserResponseDTO;
 import org.ek.cloud_storage.auth.domain.User;
@@ -29,20 +31,10 @@ public class RegistrationController {
     private final UserMapper userMapper;
     private final BucketService bucketService;
 
-    @Operation(summary = "Sign up for the service")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "user created"),
-            @ApiResponse(responseCode = "400", description = "validation error", content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation =  ErrorResponseDTO.class)
-            )),
-            @ApiResponse(responseCode = "409", description = "user with this username already exists", content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation =  ErrorResponseDTO.class)
-            )),
-            @ApiResponse(responseCode = "500", description = "unknown error" , content = @Content()),
-    })
+
     @PostMapping("/sign-up")
+    @Tag(name = "Auth")
+    @SignUpApiDocs
     public ResponseEntity<UserResponseDTO> signUp(
             @RequestBody @Valid UserDetailsRequestDTO registrationRequest) throws IOException {
         User user =  registrationService.registerNewUser(registrationRequest).orElse(null);

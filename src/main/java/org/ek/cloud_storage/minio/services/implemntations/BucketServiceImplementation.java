@@ -189,10 +189,34 @@ public class BucketServiceImplementation implements BucketService {
         }
     }
 
+    public boolean booleanValidateResourceExists(String path) {
+        try {
+
+            if (path.endsWith("/")) {
+                if (!folderExists(path))
+                    return false;
+            }
+
+            else {
+                if (!fileExists(path))
+                    return false;
+            }
+
+            return true;
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void moveResource(String oldPath, String newPath) throws IOException {
 
         validateResourceExists(oldPath);
+
+        if (booleanValidateResourceExists(newPath)) {
+            throw new MinIoResourceErrorException("Resource already exists");
+        }
 
         if (isFolder(oldPath)) {
             copyFolder(oldPath,newPath);
