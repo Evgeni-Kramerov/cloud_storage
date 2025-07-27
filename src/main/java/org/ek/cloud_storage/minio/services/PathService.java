@@ -15,109 +15,158 @@ public class PathService {
 
     private final UserRepository userRepository;
 
-    private final Pattern SAFE_PATH_PATTERN = Pattern.compile("^(?:[a-zA-Z0-9/_\\.\\-]+/?)?$");
+    private final Pattern SAFE_PATH_PATTERN =
+            Pattern.compile("^(?:[a-zA-Z0-9/_\\.\\- ]+/?)?$");
 
-    public String getUserPrefix(Principal principal) {
+    private final String USER_FILES_PREFIX_FORMAT = "user-%d-files/";
+
+    /**
+     * Helper method to extract ID from authenticated user
+     * @param principal
+     * @return
+     */
+    private long getUserId(Principal principal) {
         User currentUser = userRepository.findByUsername(principal.getName())
                 .orElseThrow(()->new UsernameNotFoundException("username not found"));
 
-        long id = currentUser.getId();
-
-        return "user-" + id + "-files/";
+        return currentUser.getId();
     }
 
-    public  String getFolderPath(String path) {
+    /**
+     * Returnes user specific files prefix (e.g - "user-123-files/")
+     * @param principal
+     * @return
+     */
+    public String getUserFilesPrefix(Principal principal) {
+        long userId = getUserId(principal);
 
-        return removeUserFolderFromPath(path.substring(0, path.lastIndexOf("/",path.length()-2) + 1));
+        return String.format(USER_FILES_PREFIX_FORMAT, userId);
     }
 
-    public  String getResourceName(String path) {
-        if(path.endsWith("/"))
-            {
-                return  path.substring(path.lastIndexOf("/",path.length()-2) + 1);
-            }
-        else
-            {
-                return path.substring(path.lastIndexOf("/") + 1);
-            }
-    }
-
-    public  String removeUserFolderFromPath(String path) {
-
-        //for folders
-        if (path.endsWith("/"))
-            {
-                if (pathContainsMoreThenAmountSlashes(path,2)){
-                    return path.substring(path.indexOf("/")+1,path.lastIndexOf("/"));
-                }
-
-                // for folders in home directory
-                else {
-                    return "/";
-                }
-            }
-
-        //for files
-        else
-            {
-                if (pathContainsMoreThenAmountSlashes(path,1)){
-                    return path.substring(path.indexOf("/")+1, path.lastIndexOf("/")) + "/";
-                }
-                //for files in home directory - path only "/"
-                else {
-                    return "/";
-                }
-            }
-    }
-
-    private boolean pathContainsMoreThenAmountSlashes(String path, int slashQuantity) {
-        int count = 0;
-        for (char c : path.toCharArray()) {
-            if (c == '/') {
-                count++;
-            }
-        }
-        return count > slashQuantity;
-    }
-
-    public String fullPathForUser(Principal principal, String path) {
-
-        System.out.println("Path from service " + path);
-
-        validatePath(path);
-
-        User currentUser = userRepository.findByUsername(principal.getName())
-                .orElseThrow(()->new UsernameNotFoundException("username not found"));
-
-        long id = currentUser.getId();
-
-        if (path.startsWith("/")) {
-            path = path.substring(1);
-        }
-
-        String fullPath = "user-" + id + "-files/" + path;
-
-
-        return fullPath;
-    }
-
-
+    /**
+     * Validates a given path. Throws exceptions otherwise
+     * - Must not contain ".." or backslashes
+     * - Must match SAFE_PATH_PATTERN
+     */
     public void validatePath(String path) throws IllegalArgumentException {
 
         if (path.contains("..") || path.contains("\\")) {
-            throw new IllegalArgumentException("path is not valid");
+            throw new IllegalArgumentException("Path is not valid");
         }
 
         if(!SAFE_PATH_PATTERN.matcher(path).matches()){
-            throw new IllegalArgumentException("path is not valid");
+            throw new IllegalArgumentException("Path is not valid");
         }
     }
 
+    /**
+     * Returns resource name from resource path
+     * File - "file.txt"
+     * Folder - "foldername/"
+     * @param path
+     * @return
+     */
+    public  String getResourceName(String path) {
+
+        if(path.endsWith("/")){
+            int secondLastSlash = path.lastIndexOf("/",path.length() - 2);
+            return path.substring(secondLastSlash + 1);
+        }
+        else {
+            int lastSlash = path.lastIndexOf("/");
+            return path.substring(lastSlash + 1);
+        }
+    }
+
+    /**
+     * Returns full path for specific user by adding user specific prefix
+     * (e.g "folder1/file.txt" -> "user-12-files/folder1/file.txt"
+     * @param principal
+     * @param path
+     * @return
+     */
+    public String getFullPathForUser(Principal principal, String path) {
+
+        validatePath(path);
+
+        long id = getUserId(principal);
+
+        String trimmedPath = path.startsWith("/")
+                ? path.substring(1)
+                : path;
+
+        return String.format("user-%d-files/%s", id, trimmedPath);
+    }
+
+    /**
+     * Returns path for parent folder of resource
+     * (e.g "folder1/folder2/file.txt" -> "folder1/folder2/"
+     * @param path
+     * @return
+     */
     public String getParentFolderPath(String path) {
-        if (!path.contains("/") || path.indexOf("/") == path.lastIndexOf("/")) {
-            return "/";
-        }
-        return path.substring(0, path.substring(0,path.length()-1).lastIndexOf("/"));
 
+
+        String trimmed = path.endsWith("/")
+                ? path.substring(0, path.length() - 1)
+                : path;
+
+        int lastSlash = trimmed.lastIndexOf('/');
+
+        return lastSlash <= 0 ? "/" : trimmed.substring(0, lastSlash + 1);
     }
+
+    /**
+     * Retunes path for the folder (e.g "folder1/folder2" -> "folder1/"
+     * @param path
+     * @return
+     */
+    public  String getFolderPath(String path) {
+
+        int slashPositionBeforeTheLastOne = path.lastIndexOf("/", path.length() - 2);
+
+        return removeUserPrefixFromPath(
+                path.substring(0, slashPositionBeforeTheLastOne + 1)
+        );
+    }
+
+    /**
+     * Removes user folder from resource path (e.g. "user-21-files/folder1/file.txt"
+     * -> "folder1/file.txt"
+     * @param path
+     * @return
+     */
+    public  String removeUserPrefixFromPath(String path) {
+
+        boolean isFolder = path.endsWith("/");
+        int slashCount = countSlashes(path);
+
+        return isFolder
+                ? removeUserPrefixForDirectory(path, slashCount)
+                : removeUserPrefixForFile(path, slashCount);
+    }
+
+    private String removeUserPrefixForFile(String path, int slashCount) {
+        int firstSlashIndex = path.indexOf("/");
+        int lastSlashIndex = path.lastIndexOf("/");
+        return slashCount > 1
+                ? path.substring(firstSlashIndex + 1, lastSlashIndex) + "/"
+                : "/";
+    }
+
+    private String removeUserPrefixForDirectory(String path, int slashCount) {
+        return slashCount > 2
+                ? path.substring(path.indexOf("/") + 1,path.lastIndexOf("/"))
+                : "/";
+    }
+
+    /**
+     * Helper function that counts number of '/' in the path
+     * @param path
+     * @return
+     */
+    private int countSlashes(String path) {
+        return (int) path.chars().filter(c -> c == '/').count();
+    }
+
 }

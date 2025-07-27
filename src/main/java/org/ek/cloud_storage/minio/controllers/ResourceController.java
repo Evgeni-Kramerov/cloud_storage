@@ -5,9 +5,8 @@ import org.ek.cloud_storage.minio.domain.dto.ResourceResponseDTO;
 import org.ek.cloud_storage.minio.domain.resource.DownloadResource;
 import org.ek.cloud_storage.minio.domain.resource.Resource;
 import org.ek.cloud_storage.minio.mappers.ResourceMapper;
-import org.ek.cloud_storage.minio.services.BucketService;
+import org.ek.cloud_storage.minio.services.bucket.BucketService;
 import org.ek.cloud_storage.minio.services.PathService;
-import org.simpleframework.xml.Path;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,9 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,7 +35,7 @@ public class ResourceController {
     public ResponseEntity<ResourceResponseDTO> getResources(Principal principal,
                                                            @RequestParam String path) throws IOException {
 
-       String fullPath = pathService.fullPathForUser(principal, path);
+       String fullPath = pathService.getFullPathForUser(principal, path);
 
        Resource resource = bucketService.getResourceInfo(fullPath);
 
@@ -52,7 +49,7 @@ public class ResourceController {
     public ResponseEntity<Void> deleteResources(Principal principal,
                                                 @RequestParam String path) throws IOException {
 
-       String fullPath = pathService.fullPathForUser(principal, path);
+       String fullPath = pathService.getFullPathForUser(principal, path);
 
        bucketService.deleteResource(fullPath);
 
@@ -64,7 +61,7 @@ public class ResourceController {
             Principal principal,
             @RequestParam String path) throws IOException {
 
-       String fullPath = pathService.fullPathForUser(principal, path);
+       String fullPath = pathService.getFullPathForUser(principal, path);
 
        DownloadResource downloadResource = bucketService.downloadResource(fullPath);
 
@@ -80,8 +77,8 @@ public class ResourceController {
                                                              @RequestParam String from,
                                                              @RequestParam String to) throws IOException {
 
-       String fullPathFrom = pathService.fullPathForUser(principal, from);
-       String fullPathTo = pathService.fullPathForUser(principal, to);
+       String fullPathFrom = pathService.getFullPathForUser(principal, from);
+       String fullPathTo = pathService.getFullPathForUser(principal, to);
 
        bucketService.moveResource(fullPathFrom, fullPathTo);
 
@@ -101,7 +98,7 @@ public class ResourceController {
            throw new IllegalArgumentException("query is null or empty");
        }
 
-       String userFolder = pathService.getUserPrefix(principal);
+       String userFolder = pathService.getUserFilesPrefix(principal);
 
        //Problem - return only folders
 
@@ -118,11 +115,10 @@ public class ResourceController {
                                                                @RequestParam("path") String path,
                                                                @RequestParam("object") MultipartFile[] files) throws IOException {
 
-       System.out.println("In upload Resource controller");
 
        List<MultipartFile> multipartFiles = Arrays.asList(files);
 
-       String fullPath =  pathService.fullPathForUser(principal, path);
+       String fullPath =  pathService.getFullPathForUser(principal, path);
 
        List<Resource> uploadedResources =  bucketService.uploadResource(fullPath, multipartFiles);
 
