@@ -43,7 +43,7 @@ public class PathServiceIT {
     void should_return_path_without_userid_when_given_full_path() throws IOException {
         String path = "user-details/folder1/folder2/folder3/";
 
-        String pathWithoutUserDetails = pathService.removeUserFolderFromPath(path);
+        String pathWithoutUserDetails = pathService.removeUserPrefixFromPath(path);
 
         assertEquals("folder1/folder2/folder3/", pathWithoutUserDetails);
     }

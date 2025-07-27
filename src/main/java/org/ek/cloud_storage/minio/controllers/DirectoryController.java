@@ -2,10 +2,9 @@ package org.ek.cloud_storage.minio.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.ek.cloud_storage.minio.domain.dto.ResourceResponseDTO;
-import org.ek.cloud_storage.minio.domain.resource.FolderResource;
 import org.ek.cloud_storage.minio.domain.resource.Resource;
 import org.ek.cloud_storage.minio.mappers.ResourceMapper;
-import org.ek.cloud_storage.minio.services.BucketService;
+import org.ek.cloud_storage.minio.services.bucket.BucketService;
 import org.ek.cloud_storage.minio.services.PathService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +31,7 @@ public class DirectoryController {
             Principal principal,
             String path) throws IOException {
 
-        String fullPath = pathService.fullPathForUser(principal,path);
-
-        bucketService.validateResourceExists(fullPath);
+        String fullPath = pathService.getFullPathForUser(principal,path);
 
         List<Resource> resources = bucketService.listAllResources(fullPath);
 
@@ -50,18 +47,9 @@ public class DirectoryController {
             String path
     )  throws IOException {
 
-        String fullPath = pathService.fullPathForUser(principal,path);
+        String fullPath = pathService.getFullPathForUser(principal,path);
 
-        System.out.println("In create empty folder controller");
-
-        System.out.println(path);
-
-        //TODO Return Whats needed for each method
-
-        bucketService.createEmptyFolder(fullPath);
-
-
-        Resource createdFolder = bucketService.getResourceInfo(fullPath);
+        Resource createdFolder = bucketService.createEmptyFolder(fullPath);
 
         ResourceResponseDTO response = resourceMapper.resourceToResourceResponseDTO(createdFolder);
 
