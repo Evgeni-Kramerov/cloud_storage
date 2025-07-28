@@ -9,6 +9,7 @@ import org.ek.cloud_storage.auth.security.CustomAuthEntryPoint;
 import org.ek.cloud_storage.auth.security.JsonUsernamePasswordAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -69,10 +70,13 @@ public class SecurityConfig {
                             }
                         })
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("SESSION", "JSESSIONID")
+                        .clearAuthentication(true)
 
                 )
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .sessionManagement(sess -> sess
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
                 .authenticationProvider(daoAuthenticationProvider())
                 .addFilterAt(jsonAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthEntryPoint))
