@@ -62,7 +62,7 @@ services:
     volumes:
       - ./vault/file:/vault/file
       - ./vault/logs:/vault/logs
-
+      - vault_data:/vault/data
 
 
 volumes:
@@ -74,3 +74,5 @@ volumes:
     name: redis_data
   redis_insight:
     name: redis_insight
+  vault_data:
+    name: vault_data
