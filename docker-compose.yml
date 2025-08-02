@@ -1,9 +1,29 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spring_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/your_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    networks:
+      - app_net
+
 
   frontend:
     image: cloud_storage_frontend
     ports:
       - "8090:80"
+    networks:
+      - app_net
 
   postgres:
     image: postgres
@@ -17,6 +37,8 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_net
 
   minio:
     image: minio/minio:latest
@@ -30,6 +52,8 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
+    networks:
+      - app_net
 
   redis:
     image: redis:7.2-alpine
@@ -39,6 +63,8 @@ services:
     volumes:
       - redis_data:/data
     restart: unless-stopped
+    networks:
+      - app_net
 
   redisinsight:
     image: redis/redisinsight:latest
@@ -48,20 +74,8 @@ services:
     restart: always
     volumes:
       - redis_insight:/data
-
-#  vault:
-#    image: hashicorp/vault:1.15
-#    container_name: vault
-#    user: root
-#    ports:
-#      - "8200:8200"
-#    cap_add:
-#      - IPC_LOCK
-#    volumes:
-#      - ./vault/config:/vault/config
-#      - ./vault/logs:/vault/logs
-#      - vault_data:/vault/data
-#    command: ["vault", "server", "-config=/vault/config/config.hcl"]
+    networks:
+      - app_net
 
 
 volumes:
@@ -73,5 +87,6 @@ volumes:
     name: redis_data
   redis_insight:
     name: redis_insight
-#  vault_data:
-#    name: vault_data
+
+networks:
+  app_net:
