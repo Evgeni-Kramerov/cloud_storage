@@ -10,8 +10,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.IOException;
 
-@SpringBootTest(classes = PathService.class)
-public class PathServiceIT {
+@SpringBootTest(classes = org.ek.cloud_storage.minio.services.PathService.class)
+public class PathServiceUnitTest {
 
     @MockitoBean
     private UserRepository userRepository;
