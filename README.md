@@ -61,6 +61,8 @@ Edit
 
 ```bash
 docker-compose up --build
+
+
 Run Locally (Without Docker)
 Create application.yml in src/main/resources/ with DB, MinIO, and Vault configs.
 
@@ -72,7 +74,9 @@ bash
 Copy
 Edit
 ./mvnw spring-boot:run
-🧪 Testing
+
+
+## 🧪 Testing
 Run all tests:
 
 bash
@@ -83,21 +87,15 @@ Uses H2 in-memory DB for tests.
 
 Includes both unit and integration tests.
 
-📚 API Documentation
+## 📚 API Documentation
 Once running, access Swagger UI at:
 
 bash
 Copy
 Edit
 http://localhost:8080/swagger-ui/index.html
-🔐 Vault Integration (Optional)
-If using HashiCorp Vault:
 
-Make sure Vault is running and secrets are stored at the correct path.
-
-App will auto-read them on startup.
-
-⚙️ Environment Variables
+## ⚙️ Environment Variables
 Variable	Description
 SPRING_DATASOURCE_URL	JDBC URL for PostgreSQL
 SPRING_DATASOURCE_USERNAME	DB username
@@ -108,8 +106,5 @@ MINIO_SECRET_KEY	MinIO secret key
 VAULT_TOKEN	Vault root token (if used)
 REDIS_HOST	Redis hostname (if used)
 
-🤝 Contributing
+## 🤝 Contributing
 Pull requests are welcome. For major changes, open an issue first to discuss what you'd like to change.
-
-📄 License
-This project is licensed under the MIT License.
