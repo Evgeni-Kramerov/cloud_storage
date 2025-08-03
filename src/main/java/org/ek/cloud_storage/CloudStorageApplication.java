@@ -18,46 +18,4 @@ public class CloudStorageApplication {
     public static void main(String[] args) {
         SpringApplication.run(CloudStorageApplication.class, args);
     }
-
-    @RestControllerAdvice
-    @RequiredArgsConstructor
-    public static class GlobalExceptionHandler {
-
-        @ExceptionHandler(DataIntegrityViolationException.class)
-        public ResponseEntity<ErrorResponseDTO> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
-                return ResponseEntity.status(HttpStatusCode.valueOf(409))
-                        .body(new ErrorResponseDTO("User with this username already exists"));
-
-        }
-
-        @ExceptionHandler(MethodArgumentNotValidException.class)
-        public ResponseEntity<ErrorResponseDTO> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-
-            String errorMessage = e.getBindingResult()
-                    .getFieldErrors()
-                    .stream()
-                    .map(FieldError::getDefaultMessage)
-                    .toList()
-                    .getFirst();
-
-            return ResponseEntity.status(HttpStatusCode.valueOf(400))
-                        .body(new ErrorResponseDTO("Validation error " + errorMessage));
-
-        }
-
-        @ExceptionHandler(ConstraintViolationException.class)
-        public ResponseEntity<ErrorResponseDTO> handleConstraintViolationException(ConstraintViolationException e) {
-            return ResponseEntity.status(HttpStatusCode.valueOf(400))
-                    .body(new ErrorResponseDTO("Validation error " + e.getMessage()));
-
-        }
-
-        @ExceptionHandler(IllegalArgumentException.class)
-        public ResponseEntity<ErrorResponseDTO> handleIllegalArgumentException(IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatusCode.valueOf(400))
-                    .body(new ErrorResponseDTO("Validation error " + e.getMessage()));
-        }
-
-
-    }
 }
