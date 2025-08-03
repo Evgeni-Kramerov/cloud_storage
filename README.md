@@ -1,70 +1,67 @@
-☁️ Cloud Storage
+# ☁️ Cloud Storage
+
 A Spring Boot backend application for secure cloud file storage with folder management, user authentication, and MinIO integration.
 
-🚀 Features
+## 🚀 Features
 
-🔐 User authentication and registration
+- 🔐 User authentication and registration
+- 📁 Create and manage folders  
+- 📂 Upload/download/delete files  
+- 🗂️ View folder structure and metadata  
+- 💾 MinIO integration for S3-compatible storage  
+- 🧠 Redis-backed session management
+- 🧪 Unit and integration testing  
 
-📁 Create and manage folders
+## 🧰 Tech Stack
 
-📂 Upload/download/delete files
+- Java 17+  
+- Spring Boot 3  
+- Spring Security  
+- Spring Data JPA  
+- MinIO (S3-compatible)  
+- PostgreSQL (or H2 for testing)  
+- Redis (for session store)  
+- HashiCorp Vault (for secrets management)  
+- Docker & Docker Compose  
 
-🗂️ View folder structure and metadata
+## 🛠️ Setup & Run
 
-💾 MinIO integration for S3-compatible storage
+### Prerequisites
 
-🧠 Redis-backed session management
+- Java 17+  
+- Docker & Docker Compose  
 
-🧪 Unit and integration testing
+### Run with Docker
 
-
-🧰 Tech Stack
-Java 17+
-
-Spring Boot 3
-
-Spring Security
-
-Spring Data JPA
-
-MinIO (S3-compatible)
-
-PostgreSQL (or H2 for testing)
-
-Redis (for session store)
-
-Docker & Docker Compose
-
-
-🛠️ Setup & Run
-Prerequisites
-Java 17+
-
-Docker & Docker Compose
-
-Run with Docker
+```bash
 docker-compose up --build
+```
 
-Run Locally (Without Docker)
-Create application.yml in src/main/resources/ with DB, MinIO, and Vault configs
+### Run Locally (Without Docker)
 
-Start PostgreSQL, MinIO, Redis, and Vault manually or with Docker
+1. Create `application.yml` in `src/main/resources/` with DB, MinIO, and Vault configs  
+2. Start PostgreSQL, MinIO, Redis, and Vault manually or with Docker  
+3. Run the app:
 
-Run the app:
-
+```bash
 ./mvnw spring-boot:run
+```
 
-🧪 Testing
+## 🧪 Testing
+
 Run all tests:
 
+```bash
 ./mvnw test
+```
 
-Uses H2 in-memory DB for tests
+- Uses H2 in-memory DB for tests  
+- Includes both unit and integration tests  
 
-Includes both unit and integration tests
+## 📚 API Documentation
 
-📚 API Documentation
-Once running, access Swagger UI at:
+Once running, access Swagger UI at:  
+[http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
-http://localhost:8080/swagger-ui/index.html
+
 
