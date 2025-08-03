@@ -20,8 +20,7 @@ A Spring Boot backend application for secure cloud file storage with folder mana
 - Spring Data JPA  
 - MinIO (S3-compatible)  
 - PostgreSQL (or H2 for testing)  
-- Redis (for session store)  
-- HashiCorp Vault (for secrets management)  
+- Redis (for session store)   
 - Docker & Docker Compose  
 
 ## 🛠️ Setup & Run
