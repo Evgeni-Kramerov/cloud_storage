@@ -1,8 +1,8 @@
 package org.ek.cloud_storage.integration.auth.services;
 
-import org.ek.cloud_storage.auth.domain.UserDetailsRequestDTO;
-import org.ek.cloud_storage.auth.domain.User;
-import org.ek.cloud_storage.auth.services.RegistrationService;
+import org.ek.cloud_storage.domain.UserDetailsRequestDTO;
+import org.ek.cloud_storage.domain.User;
+import org.ek.cloud_storage.services.RegistrationService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

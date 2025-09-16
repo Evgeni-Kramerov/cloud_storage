@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.ek.cloud_storage.ErrorResponseDTO;
+import org.ek.cloud_storage.exception.ErrorResponseDTO;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

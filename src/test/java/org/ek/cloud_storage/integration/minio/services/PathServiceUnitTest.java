@@ -1,7 +1,7 @@
 package org.ek.cloud_storage.integration.minio.services;
 
-import org.ek.cloud_storage.auth.repositories.UserRepository;
-import org.ek.cloud_storage.minio.services.PathService;
+import org.ek.cloud_storage.repositories.UserRepository;
+import org.ek.cloud_storage.services.PathService;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.IOException;
 
-@SpringBootTest(classes = org.ek.cloud_storage.minio.services.PathService.class)
+@SpringBootTest(classes = PathService.class)
 public class PathServiceUnitTest {
 
     @MockitoBean

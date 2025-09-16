@@ -1,8 +1,8 @@
 package org.ek.cloud_storage.auth.security;
 
 import lombok.RequiredArgsConstructor;
-import org.ek.cloud_storage.auth.domain.User;
-import org.ek.cloud_storage.auth.repositories.UserRepository;
+import org.ek.cloud_storage.domain.User;
+import org.ek.cloud_storage.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
